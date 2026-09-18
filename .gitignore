@@ -1,0 +1,6 @@
+.env
+config.env
+*.log
+.DS_Store
+/data/
+/work/
