@@ -39,6 +39,8 @@ Skip steps you already have:
 
 Reference results from an RTX 4070 Laptop (8 GiB VRAM, 62 GiB RAM, 2026-09-17): [results/rtx4070-laptop-2026-09-17.md](results/rtx4070-laptop-2026-09-17.md). Full runbook: [docs/plan.md](docs/plan.md).
 
+A GB300 study across seven scale factors, all 22 queries, and three host capacities is in the [comprehensive spill report](results/comprehensive-spill-report-2026-09-28.html), with [query-level CSV](results/comprehensive-spill-matrix-2026-09-28.csv) and [JSON](results/comprehensive-spill-matrix-2026-09-28.json).
+
 ## Configure for a bigger box
 
 Copy `config.env.example` → `config.env`. The knobs that almost always change:
