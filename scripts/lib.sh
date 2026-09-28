@@ -6,18 +6,13 @@ BENCH_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export BENCH_ROOT
 
 load_config() {
-  local example="$BENCH_ROOT/config.env.example"
-  local local_cfg="$BENCH_ROOT/config.env"
+  local local_cfg="${BENCH_CONFIG_PATH:-$BENCH_ROOT/config.env}"
   # shellcheck disable=SC1090
   set -a
   if [[ -f "$local_cfg" ]]; then
     # shellcheck disable=SC1091
-    echo "Localconfig $local_cfg loaded"
     source "$local_cfg"
-  else
-    echo "Localconfig $local_cfg not loaded"
   fi
-  echo $SIRIUS_ROOT
   set +a
 
   SIRIUS_ROOT="${SIRIUS_ROOT:-$HOME/sirius}"

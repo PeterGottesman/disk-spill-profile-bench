@@ -96,3 +96,26 @@ For separate phase commands that belong to one run, set `BENCH_RUN_ID` to the sa
 - [ ] Phase 1 logs exist; Quent `gpu_to_host_chunked` > 0 before you run all 22
 - [ ] Force-disk either observed `DISK` or you recorded that host never filled
 - [ ] `./scripts/quent-links.sh --landing` prints clickable UI URLs
+
+## Repeat a spill scaling study on another machine
+
+Use the manifest-driven matrix runner when comparing query runtime with HOST and DISK spilling. Set `SIRIUS_ROOT`, `DATA_ROOT`, and any GPU/executor settings in a local `config.env` first. The first HOST cap is the runtime reference; keep the same cap ordering and scale factors when comparing machines.
+
+```bash
+./scripts/detect-hardware.sh
+./scripts/run-matrix.py --host-caps 196GiB 8GiB 1GiB \
+  --scale-factors 1 10 100 250 500 750 1000 \
+  --repetitions 3 --iterations 2 --dry-run
+./scripts/run-matrix.py --host-caps 196GiB 8GiB 1GiB \
+  --scale-factors 1 10 100 250 500 750 1000 \
+  --repetitions 3 --iterations 2 --generate --id my_machine_20260928
+source config.env
+./scripts/build-spill-report.py \
+  --manifest "$DATA_ROOT/experiments/my_machine_20260928/manifest.json"
+```
+
+Choose HOST caps that fit the machine's RAM; the first should be a practical high-capacity reference. Set `--output` to place the experiment elsewhere. Omit `--generate` if all Parquet datasets exist. The runner validates all eight tables and their Parquet footers before benchmarking; it will not replace an existing invalid dataset. It requires a built Sirius checkout and `pixi` on `PATH`. `--resume` skips completed entries in an existing manifest. An interrupted entry with telemetry must be rerun under a new experiment ID to avoid mixing attempts.
+
+Each experiment has a JSON manifest with machine metadata, revisions, dataset checks, workload settings, and run status. Every host-capacity/repetition run has its own config snapshot, rendered YAML, spill directory, Quent NDJSON, timing logs, and analyzed metrics. The report builder writes `report/report.html`, `measurements.csv`, and `measurements.json` beside the manifest. It requires complete timings and telemetry for every query and iteration. The HTML uses the last iteration of each run, summarizes each 22-query repetition first, then reports medians and runtime ranges across repetitions. HOST/DISK GiB are cumulative logical placement volumes from Quent batch capacity, not measured physical disk I/O.
+
+For a cross-machine comparison, copy each machine's experiment directory and report. Compare the same Sirius revision, dataset generation method, scale factors, query order, and HOST caps where feasible. Record different hardware or executor settings in the manifest rather than hiding them in a shared report. `BENCH_CONFIG_PATH` can point legacy scripts at a particular config snapshot.
