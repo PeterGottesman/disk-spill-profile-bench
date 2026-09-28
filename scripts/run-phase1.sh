@@ -6,6 +6,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 load_config
 require_sirius
 ensure_dirs
+init_run_id
+log "benchmark run: $BENCH_RUN_ID"
 "$BENCH_ROOT/scripts/render-sirius-yaml.sh" >/dev/null
 
 export SIRIUS_CONFIG_FILE="$YAML_PATH"
@@ -17,7 +19,7 @@ for sf in $SCALE_FACTORS; do
     echo "missing parquet $pq — run ./scripts/generate-tpch.sh first" >&2
     exit 1
   fi
-  log_file="$LOG_DIR/phase1_sf${sf}.log"
+  log_file="$RUN_LOG_DIR/phase1_sf${sf}.log"
   log "Phase 1 SF${sf} queries=${PROBE_QUERIES} -> $log_file"
   {
     echo "=== Phase 1 SF${sf} start $(date -Is) host=${HOST_CAPACITY} ==="
@@ -25,11 +27,11 @@ for sf in $SCALE_FACTORS; do
       --config "$YAML_PATH" \
       --parquet-dir "$pq" \
       --iterations "$PHASE1_ITERATIONS" \
-      --note "spill_sf${sf}" \
+      --note "spill_sf${sf}_run_${BENCH_RUN_ID}" \
       "$sf" $PROBE_QUERIES
     echo "=== Phase 1 SF${sf} end $(date -Is) ==="
   } 2>&1 | tee "$log_file"
 done
 
 log "spill=$(du -sh "$SPILL_DIR" | awk '{print $1}') telemetry=$(du -sh "$TELEMETRY_DIR" | awk '{print $1}')"
-log "summarize with: ./scripts/summarize-telemetry.sh"
+log "run=$BENCH_RUN_ID; summarize with: ./scripts/summarize-telemetry.sh --run-id $BENCH_RUN_ID"

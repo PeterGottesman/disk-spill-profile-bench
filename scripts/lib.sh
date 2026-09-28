@@ -10,16 +10,14 @@ load_config() {
   local local_cfg="$BENCH_ROOT/config.env"
   # shellcheck disable=SC1090
   set -a
-  # Defaults first, then local overrides, then already-exported env wins
-  # because we source example into an empty-if-unset pattern below.
-  if [[ -f "$example" ]]; then
-    # shellcheck disable=SC1091
-    source "$example"
-  fi
   if [[ -f "$local_cfg" ]]; then
     # shellcheck disable=SC1091
+    echo "Localconfig $local_cfg loaded"
     source "$local_cfg"
+  else
+    echo "Localconfig $local_cfg not loaded"
   fi
+  echo $SIRIUS_ROOT
   set +a
 
   SIRIUS_ROOT="${SIRIUS_ROOT:-$HOME/sirius}"
@@ -75,4 +73,15 @@ pixi_in_sirius() {
 
 log() {
   printf '[%s] %s\n' "$(date -Is)" "$*"
+}
+
+init_run_id() {
+  BENCH_RUN_ID="${BENCH_RUN_ID:-$(date -u +%Y%m%dT%H%M%S%NZ)_$$}"
+  if [[ ! "$BENCH_RUN_ID" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    echo "BENCH_RUN_ID must contain only letters, digits, underscores, or hyphens" >&2
+    exit 2
+  fi
+  export BENCH_RUN_ID
+  RUN_LOG_DIR="$LOG_DIR/$BENCH_RUN_ID"
+  mkdir -p "$RUN_LOG_DIR"
 }

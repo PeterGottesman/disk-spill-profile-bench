@@ -37,6 +37,8 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+init_run_id
+log "benchmark run: $BENCH_RUN_ID"
 "$BENCH_ROOT/scripts/detect-hardware.sh"
 if [[ "$SKIP_BUILD" -eq 0 ]]; then
   "$BENCH_ROOT/scripts/build-sirius.sh"
@@ -52,5 +54,5 @@ fi
 if [[ "$SKIP_PHASE3" -eq 0 ]]; then
   "$BENCH_ROOT/scripts/run-phase3.sh"
 fi
-"$BENCH_ROOT/scripts/summarize-telemetry.sh"
+"$BENCH_ROOT/scripts/summarize-telemetry.sh" --run-id "$BENCH_RUN_ID"
 log "next: ./scripts/run-quent.sh && ./scripts/quent-links.sh --landing"

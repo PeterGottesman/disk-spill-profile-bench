@@ -104,7 +104,7 @@ def session_labels(sess: str):
         return []
     blob = b"".join(f.read_bytes() for f in qdir.iterdir() if f.is_file())
     text = "".join(chr(b) if 32 <= b < 127 else " " for b in blob)
-    return sorted(set(re.findall(r"(?:full_sf\d+|spill_sf\d+[A-Za-z0-9_]*)", text)))
+    return sorted({re.split(r"_tpch_q\d+_iter\d+", m)[0] for m in re.findall(r"(?:full|spill)_sf\d+(?:_[A-Za-z0-9_-]+)?", text)})
 
 
 engines = get("/engines?with_metadata=true")

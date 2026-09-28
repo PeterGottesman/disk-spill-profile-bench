@@ -1,0 +1,135 @@
+{
+  "date_utc": "2026-09-28",
+  "machine": "NVIDIA GB300",
+  "baseline_host_capacity_gib": 196,
+  "capped_host_capacity_gib": 1,
+  "baseline_run_id": "scaling_20260928T1353Z",
+  "capped_run_id": "disk_scaling_1g_20260928",
+  "timing_measure": "mean of iterations 2 and 3, seconds",
+  "traces": [
+    {
+      "scale_factor": 1,
+      "warm_seconds_baseline": {
+        "Q1": 0.0155,
+        "Q6": 0.0095,
+        "Q9": 0.0325
+      },
+      "warm_seconds_capped": {
+        "Q1": 0.0155,
+        "Q6": 0.009,
+        "Q9": 0.0315
+      },
+      "q9_ndjson_trace": {
+        "session": "01a0e857-82df-71d7-bdfb-97895fa3b2ec",
+        "run_id": "disk_ndjson_1g_20260928",
+        "disk_placement_entries": 0,
+        "logical_placement_bytes": 0,
+        "unique_batch_ids": 0,
+        "unique_batch_logical_bytes": 0,
+        "source_entries": {},
+        "source_logical_bytes": {},
+        "task_preparations_with_disk_input": 0
+      }
+    },
+    {
+      "scale_factor": 10,
+      "warm_seconds_baseline": {
+        "Q1": 0.06,
+        "Q6": 0.036000000000000004,
+        "Q9": 0.0825
+      },
+      "warm_seconds_capped": {
+        "Q1": 0.0595,
+        "Q6": 0.035500000000000004,
+        "Q9": 0.082
+      },
+      "q9_ndjson_trace": {
+        "session": "01a0e857-8668-7553-89de-f8f2f4ae17bb",
+        "run_id": "disk_ndjson_1g_20260928",
+        "disk_placement_entries": 0,
+        "logical_placement_bytes": 0,
+        "unique_batch_ids": 0,
+        "unique_batch_logical_bytes": 0,
+        "source_entries": {},
+        "source_logical_bytes": {},
+        "task_preparations_with_disk_input": 0
+      }
+    },
+    {
+      "scale_factor": 100,
+      "warm_seconds_baseline": {
+        "Q1": 0.4495,
+        "Q6": 0.221,
+        "Q9": 0.5215000000000001
+      },
+      "warm_seconds_capped": {
+        "Q1": 0.434,
+        "Q6": 0.222,
+        "Q9": 0.526
+      },
+      "q9_ndjson_trace": {
+        "session": "01a0e857-8a08-7622-99be-7c4a79ee4a82",
+        "run_id": "disk_ndjson_1g_20260928",
+        "disk_placement_entries": 0,
+        "logical_placement_bytes": 0,
+        "unique_batch_ids": 0,
+        "unique_batch_logical_bytes": 0,
+        "source_entries": {},
+        "source_logical_bytes": {},
+        "task_preparations_with_disk_input": 0
+      }
+    },
+    {
+      "scale_factor": 1000,
+      "warm_seconds_baseline": {
+        "Q1": 4.452999999999999,
+        "Q6": 2.092,
+        "Q9": 7.0755
+      },
+      "warm_seconds_capped": {
+        "Q1": 4.438000000000001,
+        "Q6": 2.0885,
+        "Q9": 13.8615
+      },
+      "q9_ndjson_trace": {
+        "session": "01a0e857-8f8b-701a-bb9b-d4b6d0d2bc46",
+        "run_id": "disk_ndjson_1g_20260928",
+        "disk_placement_entries": 187,
+        "logical_placement_bytes": 24404280992,
+        "unique_batch_ids": 157,
+        "unique_batch_logical_bytes": 23102013280,
+        "source_entries": {
+          "HOST": 118,
+          "GPU-0": 69
+        },
+        "source_logical_bytes": {
+          "HOST": 5584719708,
+          "GPU-0": 18819561284
+        },
+        "task_preparations_with_disk_input": 88
+      }
+    }
+  ],
+  "sf1000_q1_ndjson_trace": {
+    "session": "01a0e858-e344-7464-a24d-ccf1fcf5d7f0",
+    "run_id": "disk_ndjson_q1_20260928",
+    "disk_placement_entries": 0,
+    "logical_placement_bytes": 0,
+    "unique_batch_ids": 0,
+    "unique_batch_logical_bytes": 0,
+    "source_entries": {},
+    "source_logical_bytes": {},
+    "task_preparations_with_disk_input": 0
+  },
+  "sf1000_q6_ndjson_trace": {
+    "session": "01a0e858-f84f-70e0-91fe-bef52b351406",
+    "run_id": "disk_ndjson_q6_20260928",
+    "disk_placement_entries": 0,
+    "logical_placement_bytes": 0,
+    "unique_batch_ids": 0,
+    "unique_batch_logical_bytes": 0,
+    "source_entries": {},
+    "source_logical_bytes": {},
+    "task_preparations_with_disk_input": 0
+  }
+}

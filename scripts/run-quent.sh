@@ -74,7 +74,7 @@ for sess in sorted(root.iterdir()):
         continue
     blob = b"".join(f.read_bytes() for f in qdir.iterdir() if f.is_file())
     text = "".join(chr(b) if 32 <= b < 127 else " " for b in blob)
-    labels = sorted(set(re.findall(r"full_sf\d+", text)))
+    labels = sorted({re.split(r"_tpch_q\d+_iter\d+", m)[0] for m in re.findall(r"full_sf\d+(?:_[A-Za-z0-9_-]+)?", text)})
     if not labels:
         continue
     rows.append((",".join(labels), sess.name))
@@ -82,7 +82,7 @@ if not rows:
     print("  (no full_sf* query labels found under this telemetry dir)")
     raise SystemExit
 for labels, sid in rows:
-    print(f"  {labels:12}  session {sid}")
+    print(f"  {labels}  session {sid}")
 PY
 }
 

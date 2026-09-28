@@ -15,6 +15,7 @@ $EDITOR config.env                    # SIRIUS_ROOT, DATA_ROOT, SCALE_FACTORS, H
 ./scripts/run-all.sh                  # build + parquet + phase 1 + force-disk + phase 3
 ./scripts/run-quent.sh                # http://localhost:8080
 ./scripts/quent-links.sh --landing full_sf100 full_sf200 full_sf300
+./scripts/summarize-telemetry.sh       # run ID, labels, session, spill counts
 ```
 
 Skip steps you already have:
@@ -70,6 +71,19 @@ results/               dated result write-ups (this box, then others)
 ```
 
 Parquet, spill files, telemetry, and logs stay under `DATA_ROOT` (not in git).
+
+## Keep runs separate
+
+Each `run-all.sh` invocation creates a run ID such as `20260928T143012123456789Z_12345`. The same ID appears in its Quent query labels (`full_sf100_run_<ID>`), the telemetry summary, and logs under `DATA_ROOT/logs/<ID>/`. Separate invocations keep their logs and labels distinct. Old sessions appear as `(legacy)` in the summary.
+
+```bash
+./scripts/summarize-telemetry.sh                 # all runs
+ID=20260928T143012123456789Z_12345     # copy an ID from the summary
+./scripts/summarize-telemetry.sh --run-id "$ID"  # one run
+./scripts/extract-timings.sh "$DATA_ROOT/logs/$ID/phase3_sf100.log"
+```
+
+For separate phase commands that belong to one run, set `BENCH_RUN_ID` to the same value for each command. Use only letters, digits, underscores, or hyphens. Without it, each phase command creates its own ID.
 
 ## Checklist on a new machine
 

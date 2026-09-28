@@ -11,12 +11,27 @@ if [[ ! -d "$TELEMETRY_DIR" ]]; then
   exit 1
 fi
 
-python3 - "$TELEMETRY_DIR" <<'PY'
-import re, sys
+RUN_FILTER=""
+case "${1:-}" in
+  "") ;;
+  --run-id)
+    if [[ $# -ne 2 || -z "$2" ]]; then
+      echo "Usage: $0 [--run-id ID]" >&2
+      exit 2
+    fi
+    RUN_FILTER="$2"
+    ;;
+  *) echo "Usage: $0 [--run-id ID]" >&2; exit 2 ;;
+esac
+
+python3 - "$TELEMETRY_DIR" "$RUN_FILTER" <<'PYCODE'
+import re
+import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-print(f"{'session':<40} {'labels':<42} {'gpu_to_host':>11} {'HOST':>6} {'DISK':>6} {'MiB':>8}")
+run_filter = sys.argv[2]
+rows = []
 for sess in sorted(root.iterdir()):
     if not sess.is_dir():
         continue
@@ -26,17 +41,30 @@ for sess in sorted(root.iterdir()):
     labels = []
     if qdir.exists():
         blob = b"".join(f.read_bytes() for f in qdir.iterdir() if f.is_file())
-        text = "".join(chr(b) if 32 <= b < 127 else " " for b in blob)
-        labels = sorted(set(re.findall(r"(?:full_sf\d+|spill_sf\d+[A-Za-z0-9_]*)", text)))
+        # The Sirius helper appends _tpch_qN_iterK to the --note value.
+        labels = sorted({
+            re.split(r"_tpch_q\d+_iter\d+", m.decode())[0]
+            for m in re.findall(rb"(?:full|spill)_sf\d+(?:_[A-Za-z0-9_-]+)?", blob)
+        })
+    run_ids = sorted({m.group(1) for label in labels if (m := re.search(r"_run_([A-Za-z0-9_-]+)$", label))})
+    run_id = ",".join(run_ids) if run_ids else "(legacy)"
+    if run_filter and run_filter not in run_ids:
+        continue
     nvblob = b"".join(f.read_bytes() for f in nv.iterdir() if f.is_file()) if nv.exists() else b""
     tblob = b"".join(f.read_bytes() for f in task.iterdir() if f.is_file()) if task.exists() else b""
     size = sum(f.stat().st_size for f in sess.rglob("*") if f.is_file()) / (1024 * 1024)
-    print(
-        f"{sess.name:<40} {','.join(labels)[:42]:<42} "
-        f"{nvblob.count(b'gpu_to_host_chunked'):11d} "
-        f"{tblob.count(b'HOST'):6d} {tblob.count(b'DISK'):6d} {size:8.1f}"
-    )
-PY
+    rows.append((run_id, ",".join(labels) or "(unlabeled)", sess.name,
+                 nvblob.count(b"gpu_to_host_chunked"), tblob.count(b"HOST"),
+                 tblob.count(b"DISK"), size))
+
+headers = ("run ID", "labels", "session", "gpu_to_host", "HOST", "DISK", "MiB")
+widths = [max(len(str(row[i])) for row in [headers, *rows]) for i in range(3)]
+print(f"{headers[0]:<{widths[0]}}  {headers[1]:<{widths[1]}}  {headers[2]:<{widths[2]}}  {headers[3]:>11}  {headers[4]:>6}  {headers[5]:>6}  {headers[6]:>8}")
+for run_id, labels, session, gpu, host, disk, size in rows:
+    print(f"{run_id:<{widths[0]}}  {labels:<{widths[1]}}  {session:<{widths[2]}}  {gpu:11d}  {host:6d}  {disk:6d}  {size:8.1f}")
+if not rows:
+    print("(no matching sessions)")
+PYCODE
 
 echo
 echo "spill dir: $(du -sh "$SPILL_DIR" 2>/dev/null | awk '{print $1}')"

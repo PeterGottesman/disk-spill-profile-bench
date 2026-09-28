@@ -29,7 +29,7 @@ Rule of thumb: parquet ≈ **0.26 GiB per SF unit** on tpchgen-rs (SF100 ≈ 26G
 `./scripts/run-phase1.sh`
 
 - Each `SCALE_FACTORS` × `PROBE_QUERIES` (default `1 6 9`) × `PHASE1_ITERATIONS` (default 1).
-- Labels: `spill_sf<SF>_tpch_q<N>_iterK`.
+- Labels: `spill_sf<SF>_run_<ID>_tpch_q<N>_iterK`.
 - One SF per DuckDB process so a failure does not wipe earlier telemetry.
 
 Watch: `nvidia-smi -l 2` and `du -sh $DATA_ROOT/spill`.
@@ -38,13 +38,13 @@ If `spill/` stays empty and Quent task `DISK` is 0 after the largest SF: host di
 
 If a query OOM-retries then fails: record OOM for that `(SF, query)` and continue.
 
-Pass: one log per SF under `$DATA_ROOT/logs/phase1_sf*.log`; telemetry dir non-empty.
+Pass: one log per SF under `$DATA_ROOT/logs/<ID>/phase1_sf*.log`; telemetry dir non-empty.
 
 ### 1b — force host→disk
 
 `./scripts/run-force-disk.sh`
 
-Walks `FORCE_DISK_HOST_CAPS` (largest first), re-renders YAML, re-runs `FORCE_DISK_SF` × `FORCE_DISK_QUERY` (default SF300 q9) until the newest Quent session's task postcard contains `DISK`. Writes the winning cap to `$DATA_ROOT/logs/host_cap_that_hit_disk.txt`.
+Walks `FORCE_DISK_HOST_CAPS` (largest first), re-renders YAML, re-runs `FORCE_DISK_SF` × `FORCE_DISK_QUERY` (default SF300 q9) until the matching Quent session's task postcard contains `DISK`. Writes the winning cap to `$DATA_ROOT/logs/<ID>/host_cap_that_hit_disk.txt`.
 
 On the reference laptop, 40 GiB and 16 GiB host still had `DISK=0`; **8 GiB** was the first hit (`DISK=23`). A box with more RAM will need a different list.
 
@@ -71,12 +71,12 @@ Combined probe sessions (q1+q6+q9 in one process) are **session-level**: do not 
 
 `./scripts/run-phase3.sh`
 
-All 22 queries × `PHASE3_ITERATIONS` (default 2, cold+warm), one SF at a time. Labels `full_sf<SF>_tpch_q<N>_iterK`.
+All 22 queries × `PHASE3_ITERATIONS` (default 2, cold+warm), one SF at a time. Labels `full_sf<SF>_run_<ID>_tpch_q<N>_iterK`.
 
 Then:
 
 ```bash
-./scripts/extract-timings.sh "$DATA_ROOT/logs/phase3_sf100.log"
+./scripts/extract-timings.sh "$DATA_ROOT/logs/<ID>/phase3_sf100.log"
 ./scripts/summarize-telemetry.sh
 ./scripts/quent-links.sh --landing full_sf100 full_sf200 full_sf300
 ```
