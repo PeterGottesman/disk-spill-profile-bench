@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import shlex
 import shutil
@@ -45,10 +46,13 @@ def machine_info(data_root):
     info = {'hostname': os.uname().nodename, 'cpu_count': os.cpu_count(),
             'memory_kib': None, 'gpu': None, 'data_disk': None}
     try:
-        info['cpu_model'] = next(line.split(':', 1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines() if line.startswith('model name'))
         info['memory_kib'] = int(next(line.split()[1] for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemTotal:')))
     except (OSError, StopIteration):
         pass
+    try:
+        info['cpu_model'] = next(line.split(':', 1)[1].strip() for line in run_output(['lscpu']).splitlines() if line.startswith('Model name:'))
+    except (OSError, subprocess.CalledProcessError, StopIteration):
+        info['cpu_model'] = platform.machine()
     try:
         info['gpu'] = run_output(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv,noheader']).splitlines()
     except (OSError, subprocess.CalledProcessError):

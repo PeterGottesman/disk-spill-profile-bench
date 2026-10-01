@@ -1,6 +1,13 @@
 .env
 config.env
+config.two-gpu.env
+config.two-gpu-0.5.env
+config.large-one-gpu.env
+config.host64.env
+config.raid0.env
 *.log
+*.swp
+__pycache__/
 .DS_Store
 /data/
 /work/

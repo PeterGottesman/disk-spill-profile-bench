@@ -52,6 +52,7 @@ Copy `config.env.example` → `config.env`. The knobs that almost always change:
 | `SCALE_FACTORS` | `100 200 300` | e.g. `100 300 1000` |
 | `CUDAARCHS` | auto (`89-real` on 4070) | auto, or `90a-real` / `100f-real` |
 | `GPU_USAGE_LIMIT_FRACTION` | `0.9` | leave; or set `GPU_USAGE_LIMIT=40GiB` |
+| `NUM_GPUS` | `1` | e.g. `2` with `CUDA_VISIBLE_DEVICES=0,1` in the local config |
 | `HOST_CAPACITY` | `8GiB` | start ~60% of RAM, then shrink until disk shows up |
 | `FORCE_DISK_HOST_CAPS` | `40GiB 16GiB 8GiB` | e.g. `256GiB 64GiB 16GiB` |
 | `DISK_CAPACITY` | `200GiB` | whatever the NVMe can spare |
@@ -117,5 +118,7 @@ source config.env
 Choose HOST caps that fit the machine's RAM; the first should be a practical high-capacity reference. Set `--output` to place the experiment elsewhere. Omit `--generate` if all Parquet datasets exist. The runner validates all eight tables and their Parquet footers before benchmarking; it will not replace an existing invalid dataset. It requires a built Sirius checkout and `pixi` on `PATH`. `--resume` skips completed entries in an existing manifest. An interrupted entry with telemetry must be rerun under a new experiment ID to avoid mixing attempts.
 
 Each experiment has a JSON manifest with machine metadata, revisions, dataset checks, workload settings, and run status. Every host-capacity/repetition run has its own config snapshot, rendered YAML, spill directory, Quent NDJSON, timing logs, and analyzed metrics. The report builder writes `report/report.html`, `measurements.csv`, and `measurements.json` beside the manifest. It requires complete timings and telemetry for every query and iteration. The HTML uses the last iteration of each run, summarizes each 22-query repetition first, then reports medians and runtime ranges across repetitions. HOST/DISK GiB are cumulative logical placement volumes from Quent batch capacity, not measured physical disk I/O.
+
+Reports show the GPU count, visible devices, GPU usage limit, dataset root, and labeled runtime axes. GPU settings come from the immutable run snapshots and are included in CSV and JSON. The report directory includes `config.env` for the reference run and `configs/<run-id>/config.env` for every run, with links from the HTML. A matching source config is copied to `source-config.env` when its hash still matches the manifest. If the manifest contains `storage.description`, the HTML also displays that storage description.
 
 For a cross-machine comparison, copy each machine's experiment directory and report. Compare the same Sirius revision, dataset generation method, scale factors, query order, and HOST caps where feasible. Record different hardware or executor settings in the manifest rather than hiding them in a shared report. `BENCH_CONFIG_PATH` can point legacy scripts at a particular config snapshot.
